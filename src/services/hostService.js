@@ -263,7 +263,7 @@ const getHostsService = async (
             "nameOfBusiness",
             "boardingOfPets",
             "propertyPhotos",
-            "services",
+            "Services",
             "pricePerPet",
             "topRated",
             "mostPopullar",

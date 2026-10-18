@@ -262,6 +262,7 @@ const initializeHost = () => {
         Services: {
             type: DataTypes.JSON,
             allowNull: false,
+            field: 'Services',
             validate: {
                 isValidServices(value) {
                     if (!Array.isArray(value)) {
