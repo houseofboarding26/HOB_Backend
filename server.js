@@ -43,7 +43,7 @@ const startServer = async () => {
     }
 };
 
-startServer(); 
+startServer();
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -59,6 +59,3 @@ process.on('SIGINT', () => {
     console.log('Received SIGINT. Shutting down gracefully...');
     process.exit(0);
 });
-
-
-startServer();

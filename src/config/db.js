@@ -11,26 +11,27 @@ let sequelize = null;
 let initializingPromise = null;
 
 const parseConnectionUri = (uri) => {
-    const url = new URL(uri);
+    const sanitizedUri = uri.replace(/[?&]sslmode=[^&]+/gi, '');
+    const url = new URL(sanitizedUri);
+    const isRemote = url.hostname.includes('aivencloud.com') || url.hostname.includes('render.com') || url.hostname.includes('railway.app');
+
     return {
         host: url.hostname,
         username: url.username,
         password: url.password,
         database: url.pathname.slice(1),
-        port: parseInt(url.port, 10),
-        dialect: 'mysql',
-        dialectModule: require('mysql2'),
+        port: parseInt(url.port, 10) || 5432,
+        dialect: 'postgres',
         pool: {
             max: 10,
             min: 0,
             acquire: 30000,
             idle: 10000
         },
+        logging: false,
         dialectOptions: {
-            supportBigNumbers: true,
-            bigNumberStrings: true
-        },
-        logging: false
+            ssl: isRemote ? { rejectUnauthorized: false } : false
+        }
     };
 };
 

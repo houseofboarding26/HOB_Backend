@@ -2,6 +2,25 @@
 const { Op, Sequelize } = require('sequelize');
 const { Host: getHost } = require('../models/HostModel');
 
+const escapeSqlString = (value) => String(value).replace(/'/g, "''");
+
+const jsonTextContains = (field, value) =>
+    Sequelize.literal(`
+        EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements_text(COALESCE(${field}::jsonb, '[]'::jsonb)) AS item
+            WHERE item = '${escapeSqlString(value)}'
+        )
+    `);
+
+const jsonObjectContainsKeyValue = (field, key, value) =>
+    Sequelize.literal(`
+        EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements(COALESCE(${field}::jsonb, '[]'::jsonb)) AS item
+            WHERE item->>'${key}' = '${escapeSqlString(value)}'
+        )
+    `);
 
 const addHostService = async (hostData) => {
     const Host = getHost();
@@ -145,18 +164,10 @@ const getHostsService = async (
     }
 
     if (address) {
-        const searchAddress = String(address)
-            .trim()
-            .replace(/'/g, "''");
-
+        const searchAddress = escapeSqlString(String(address).trim());
         where[Op.and] = where[Op.and] || [];
-
         where[Op.and].push(
-            Sequelize.literal(`
-            LOWER(
-                CAST(address AS CHAR)
-            ) LIKE LOWER('%${searchAddress}%')
-        `)
+            Sequelize.literal(`LOWER(CAST(address AS text)) LIKE LOWER('%${searchAddress}%')`)
         );
     }
 
@@ -185,31 +196,21 @@ const getHostsService = async (
         }
 
         where[Op.and] = where[Op.and] || [];
-
         where[Op.and].push(
             Sequelize.literal(`
-            EXISTS (
-                SELECT 1
-                FROM JSON_TABLE(
-                    pricePerPet,
-                    '$[*]' COLUMNS (
-                        petType VARCHAR(50) PATH '$.petType',
-                        dogPrice DECIMAL(10,2) PATH '$.small.price',
-                        otherPrice DECIMAL(10,2) PATH '$.price'
+                EXISTS (
+                    SELECT 1
+                    FROM jsonb_array_elements(COALESCE(pricePerPet::jsonb, '[]'::jsonb)) AS price_data
+                    WHERE (
+                        price_data->>'petType' = 'Dog'
+                        AND COALESCE((price_data->'small'->>'price')::numeric, 0) BETWEEN ${min} AND ${max}
                     )
-                ) AS price_data
-                WHERE
-                    (
-                        price_data.petType = 'Dog'
-                        AND price_data.dogPrice BETWEEN ${min} AND ${max}
+                    OR (
+                        price_data->>'petType' <> 'Dog'
+                        AND COALESCE((price_data->>'price')::numeric, 0) BETWEEN ${min} AND ${max}
                     )
-                    OR
-                    (
-                        price_data.petType <> 'Dog'
-                        AND price_data.otherPrice BETWEEN ${min} AND ${max}
-                    )
-            )
-        `)
+                )
+            `)
         );
     }
 
@@ -227,16 +228,11 @@ const getHostsService = async (
         }
 
         where[Op.and] = where[Op.and] || [];
-
         const petConditions = boardingOfPets.map((pet) =>
-            Sequelize.literal(
-                `JSON_SEARCH(boardingOfPets, 'one', '${pet.trim()}') IS NOT NULL`
-            )
+            jsonTextContains('boardingOfPets', pet.trim())
         );
 
-        where[Op.and].push({
-            [Op.or]: petConditions
-        });
+        where[Op.and].push({ [Op.or]: petConditions });
     }
 
     if (typeof amenities === "string") {
@@ -247,17 +243,8 @@ const getHostsService = async (
         where[Op.or] = [];
 
         for (const amenity of amenities) {
-            where[Op.or].push(
-                Sequelize.literal(
-                    `JSON_CONTAINS(amenities, '"${amenity}"')`
-                )
-            );
-
-            where[Op.or].push(
-                Sequelize.literal(
-                    `JSON_SEARCH(paidAmenities, 'one', '${amenity}', NULL, '$[*].amenitie') IS NOT NULL`
-                )
-            );
+            where[Op.or].push(jsonTextContains('amenities', amenity));
+            where[Op.or].push(jsonObjectContainsKeyValue('paidAmenities', 'amenitie', amenity));
         }
     }
 
@@ -316,21 +303,13 @@ const getHostForAdminsService = async (
 
     if (status) {
         where.status = status;
-    } 
+    }
 
     if (address) {
-        const searchAddress = String(address)
-            .trim()
-            .replace(/'/g, "''");
-
+        const searchAddress = escapeSqlString(String(address).trim());
         where[Op.and] = where[Op.and] || [];
-
         where[Op.and].push(
-            Sequelize.literal(`
-            LOWER(
-                CAST(address AS CHAR)
-            ) LIKE LOWER('%${searchAddress}%')
-        `)
+            Sequelize.literal(`LOWER(CAST(address AS text)) LIKE LOWER('%${searchAddress}%')`)
         );
     }
 
@@ -339,7 +318,10 @@ const getHostForAdminsService = async (
     }
 
     if (boardingOfPets) {
-        where.boardingOfPets = { [Op.like]: `%${boardingOfPets}%` };
+        where[Op.and] = where[Op.and] || [];
+        where[Op.and].push(
+            jsonTextContains('boardingOfPets', boardingOfPets)
+        );
     }
 
     if (typeof amenities === "string") {
@@ -350,17 +332,8 @@ const getHostForAdminsService = async (
         where[Op.or] = [];
 
         for (const amenity of amenities) {
-            where[Op.or].push(
-                Sequelize.literal(
-                    `JSON_CONTAINS(amenities, '"${amenity}"')`
-                )
-            );
-
-            where[Op.or].push(
-                Sequelize.literal(
-                    `JSON_SEARCH(paidAmenities, 'one', '${amenity}', NULL, '$[*].amenitie') IS NOT NULL`
-                )
-            );
+            where[Op.or].push(jsonTextContains('amenities', amenity));
+            where[Op.or].push(jsonObjectContainsKeyValue('paidAmenities', 'amenitie', amenity));
         }
     }
 

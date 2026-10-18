@@ -33,7 +33,6 @@ const initializeCustomer = () => {
         },
         email: {
             type: DataTypes.STRING,
-            unique: true,
             allowNull: false
         },
         createdAt: {

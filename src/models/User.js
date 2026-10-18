@@ -14,12 +14,10 @@ const initializeUser = () => {
     },
     googleId: {
       type: DataTypes.STRING,
-      unique: true,
       required: false
     },
     email: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false
     },
     password: {
