@@ -28,7 +28,7 @@ const parseConnectionUri = (uri) => {
         dialect: 'postgres',
         dialectModule: pg,
         pool: {
-            max: 2,
+            max: 1,
             min: 0,
             acquire: 10000,
             idle: 5000,
@@ -36,7 +36,7 @@ const parseConnectionUri = (uri) => {
         },
         logging: false,
         dialectOptions: {
-            ssl: isRemote ? { rejectUnauthorized: false } : false
+            ssl: isRemote ? { require: true, rejectUnauthorized: false } : false
         }
     };
 };
