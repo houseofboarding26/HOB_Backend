@@ -32,8 +32,8 @@ hostRoutes.put('/put/:id',
     putHostProperty);
 
 // for Hsot Holiday (Admin and Host)
-hostRoutes.get('/holiday/get', authMiddleware, HostRoleCheck, getHostHolidayController);
-hostRoutes.get('/holiday/get/:id', authMiddleware, HostRoleCheck, getHostHolidayByIdController);
+hostRoutes.get('/holiday/get', authMiddleware, getHostHolidayController);
+hostRoutes.get('/holiday/get/:id', authMiddleware, getHostHolidayByIdController);
 hostRoutes.post('/holiday/add', authMiddleware, HostRoleCheck, payloadValidation(createHostHolidaySchema), postHostHolidayController);
 
 // host Holiday status update by CRON
