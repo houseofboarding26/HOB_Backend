@@ -8,7 +8,10 @@ if (!uri) {
     console.error('✗ DATABASE_URL or DB_URI environment variable is not set');
 }
 
-let sequelize = null;
+const globalForSequelize = globalThis;
+const sequelizeKey = '__HOB_POSTGRES_SEQUELIZE__';
+
+let sequelize = globalForSequelize[sequelizeKey] || null;
 let initializingPromise = null;
 
 const parseConnectionUri = (uri) => {
@@ -25,10 +28,11 @@ const parseConnectionUri = (uri) => {
         dialect: 'postgres',
         dialectModule: pg,
         pool: {
-            max: 10,
+            max: 2,
             min: 0,
-            acquire: 30000,
-            idle: 10000
+            acquire: 10000,
+            idle: 5000,
+            evict: 5000,
         },
         logging: false,
         dialectOptions: {
@@ -53,13 +57,14 @@ const initializePool = async () => {
             }
             const config = parseConnectionUri(uri);
             sequelize = new Sequelize(config);
-            
+            globalForSequelize[sequelizeKey] = sequelize;
+
             await sequelize.authenticate();
             console.log('✓ Database connection established successfully');
             return sequelize;
         } catch (error) {
             console.error('✗ Failed to initialize database connection:', error.message);
-            initializingPromise = null; 
+            initializingPromise = null;
             throw error;
         }
     })();

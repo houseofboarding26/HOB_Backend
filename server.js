@@ -24,14 +24,16 @@ const startServer = async () => {
         initializePassport();
         console.log('✓ Passport initialized');
 
-        console.log('Syncing models with database...');
-        const sequelize = getSequelize();
+        if (process.env.RUN_DB_SYNC === 'true') {
+            console.log('Syncing models with database...');
+            const sequelize = getSequelize();
 
-        await sequelize.sync({
-            force: false,  
-            alter: process.env.NODE_ENV === 'development'  
-        });
-        console.log('✓ Database models synced');
+            await sequelize.sync({
+                force: false,
+                alter: process.env.NODE_ENV === 'development'
+            });
+            console.log('✓ Database models synced');
+        }
 
         app.listen(PORT, () => {
             console.log(`✓ Server is running on port ${PORT}`);

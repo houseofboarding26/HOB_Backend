@@ -21,9 +21,11 @@ module.exports = async (req, res) => {
             initializePassport();
             console.log('✓ Passport initialized');
 
-            const sequelize = getSequelize();
-            await sequelize.sync({ alter: process.env.NODE_ENV !== 'production', force: false });
-            console.log('✓ Database synced');
+            if (process.env.RUN_DB_SYNC === 'true') {
+                const sequelize = getSequelize();
+                await sequelize.sync({ alter: process.env.NODE_ENV !== 'production', force: false });
+                console.log('✓ Database synced');
+            }
 
             initialized = true;
         }
