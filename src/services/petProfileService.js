@@ -15,7 +15,7 @@ const getPetProfilesService = async (page = 1, limit = 10, name = '', email = ''
 
     const where = {};
     if (userId) {
-        where.userId = { [Op.like]: `%${userId}%` };
+        where.userId = userId;
     }
     if (name) {
         where.name = { [Op.like]: `%${name}%` };
