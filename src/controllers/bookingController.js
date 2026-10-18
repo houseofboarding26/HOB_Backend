@@ -8,9 +8,9 @@ const { getHostHolidaysByHostIdService } = require("../services/HostHoliday");
 
 const getBookingController = async (req, res) => {
     try {
-        const { page, limit, status } = req.query;
+        const { page, limit, status, hostId } = req.query;
         const userId = req.user.id;
-        const bookings = await getBookingService(page, limit, userId, status);
+        const bookings = await getBookingService(page, limit, userId, status, hostId);
         res.json(bookings);
     } catch (error) {
         console.error('Error in booking controller:', error.message);

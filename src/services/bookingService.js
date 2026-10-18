@@ -13,7 +13,9 @@ const getBookingService = async (
     page = 1,
     limit = 10,
     userId = '',
-    status = '') => {
+    status = '',
+    hostId = ''
+) => {
     const Booking = getBookingModel();
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
@@ -22,6 +24,9 @@ const getBookingService = async (
     const where = {};
     if (userId) {
         where.userId = { [Op.like]: `%${userId}%` };
+    }
+    if (hostId) {
+        where.hostId = { [Op.like]: `%${hostId}%` };
     }
     if (status) {
         where.status = { [Op.like]: `%${status}%` };
@@ -79,7 +84,7 @@ const cancelUnpaidBookingsService = async (startOfToday) => {
         }
 
         const unpaidBookingIds = unpaidBookings.map(b => b.id);
-      
+
         const [cancelledCount] = await Booking.update(
             {
                 status: 'cancelled',
