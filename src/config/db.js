@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+const pg = require('pg');
 const { URL } = require('url');
 require('dotenv').config();
 
@@ -22,6 +23,7 @@ const parseConnectionUri = (uri) => {
         database: url.pathname.slice(1),
         port: parseInt(url.port, 10) || 5432,
         dialect: 'postgres',
+        dialectModule: pg,
         pool: {
             max: 10,
             min: 0,
