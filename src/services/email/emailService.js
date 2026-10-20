@@ -25,7 +25,6 @@ const sendLoginNotificationEmail = async (user) => {
         template: "account-login",
         data: {
             name: user.name,
-            app_url: 'https://www.houseofboarding.com'
         }
     });
 };
@@ -41,7 +40,6 @@ const sendbookingConfirmationEmailtoCustomer = async (booking) => {
             petnames: booking.petnames,
             checkIn: booking.checkIn,
             checkOut: booking.checkOut,
-            app_url: 'https://www.houseofboarding.com'
         }
     });
 };
