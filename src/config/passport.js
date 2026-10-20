@@ -3,6 +3,25 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { User: getUser } = require('../models/User');
 const { Customer: getCustomer } = require('../models/CustomerModel');
 
+const getGoogleCallbackUrl = () => {
+  const configuredUrl = process.env.GOOGLE_CALLBACK_URL || process.env.BASE_URL;
+
+  if (!configuredUrl) {
+    throw new Error('GOOGLE_CALLBACK_URL or BASE_URL must be set in production');
+  }
+
+  const callbackUrl = new URL(configuredUrl);
+  callbackUrl.protocol = 'https:';
+
+  if (!process.env.GOOGLE_CALLBACK_URL) {
+    callbackUrl.pathname = '/api/auth/callback';
+    callbackUrl.search = '';
+    callbackUrl.hash = '';
+  }
+
+  return callbackUrl.toString();
+};
+
 const initializePassport = () => {
   passport.use(
     new GoogleStrategy(
@@ -10,7 +29,7 @@ const initializePassport = () => {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: process.env.NODE_ENV === 'production'
-          ? `${process.env.BASE_URL}/api/auth/callback`
+          ? getGoogleCallbackUrl()
           : '/api/auth/callback',
       },
       async (accessToken, refreshToken, profile, done) => {

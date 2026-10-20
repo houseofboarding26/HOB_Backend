@@ -8,10 +8,30 @@ let passportInitialized = false;
 
 const app = express();
 
+app.set('trust proxy', 1);
+
+const normalizeOrigin = (origin) => origin.trim().replace(/\/+$/, '');
+const configuredOrigins = (process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map(normalizeOrigin)
+    .filter(Boolean);
+const allowedOrigins = new Set([
+    ...configuredOrigins,
+    ...(process.env.BASE_URL ? [normalizeOrigin(process.env.BASE_URL)] : []),
+    ...(process.env.NODE_ENV !== 'production'
+        ? ['http://localhost:5173', 'http://localhost:3000']
+        : [
+            'https://www.houseofboarding.com', 
+            'https://houseofboarding.com',
+            'https://hob-backend-pearl.vercel.app',
+            'https://hob-frontend-plum.vercel.app'
+        ]),
+]);
+
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? `${process.env.BASE_URL}`
-        : ['http://localhost:5173', 'http://localhost:3000'],
+    origin: (origin, callback) => {
+        callback(null, !origin || allowedOrigins.has(normalizeOrigin(origin)));
+    },
     credentials: true,
 }));
 

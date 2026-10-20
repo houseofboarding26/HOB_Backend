@@ -13,8 +13,7 @@ authRoutes.get('/google', (req, res, next) => {
     })(req, res, next);
 });
 
-authRoutes.get(
-    '/callback',
+authRoutes.get('/callback',
     passport.authenticate('google', { failureRedirect: '/api/auth/login-failed' }),
     googleCallback
 );
