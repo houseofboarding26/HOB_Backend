@@ -61,7 +61,7 @@ const cancelUnpaidBookingsService = async (startOfToday) => {
         const unpaidBookings = await Booking.findAll({
             where: {
                 status: {
-                    [Op.in]: ['initiated', 'running', 'pending']
+                    [Op.in]: ['initiated', 'running', 'scheduled']
                 },
                 checkIn: {
                     [Op.lt]: startOfToday
