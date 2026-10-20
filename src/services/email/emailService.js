@@ -18,13 +18,14 @@ const sendEmail = async ({
     });
 };
 
-const sendHostApprovedEmail = async (user) => {
+const sendLoginNotificationEmail = async (user) => {
     return sendEmail({
         to: user.email,
-        subject: "Host Approved",
-        template: "host-approved",
+        subject: "You signed in to your House of Boarding account",
+        template: "account-login",
         data: {
-            name: user.name
+            name: user.name,
+            app_url: process.env.APP_URL || 'https://www.houseofboarding.com'
         }
     });
 };
@@ -32,5 +33,5 @@ const sendHostApprovedEmail = async (user) => {
 
 
 module.exports = {
-    sendHostApprovedEmail
+    sendLoginNotificationEmail
 };

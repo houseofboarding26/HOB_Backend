@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { sendHostApprovedEmail } = require('./../services/email/emailService');
+const { sendLoginNotificationEmail } = require('./../services/email/emailService');
 const { getUserById, getUserByEmailService, updateUserPasswordService } = require('./../services/userService');
 
 const expiresIn = '24h';
@@ -11,7 +11,6 @@ const generateToken = (user) => {
         { expiresIn }
     );
 };
-
 
 const loginController = async (req, res) => {
     try {
@@ -85,18 +84,17 @@ const forgetPasswordController = async (req, res) => {
     }
 };
 
-
 const googleCallback = async (req, res) => {
     try {
         const user = req.user;
         const userdetails = await getUserById(user.dataValues.id);
         const token = generateToken(user);
 
-        await sendHostApprovedEmail(user);
+        await sendLoginNotificationEmail(user);
         if (!req.query.state) {
             res.status(400).json({ message: 'Missing state parameter in the request' });
         }
-        console.log('Host approved email sent to:', req.query.state);
+        console.log('Login notification email sent.');
         const redirectUrl = req.query.state
             ? decodeURIComponent(req.query.state)
             : process.env.GOOGLE_REDIRECT_URL;
