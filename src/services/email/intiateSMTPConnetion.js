@@ -1,12 +1,11 @@
-const { success } = require("zod");
 const nodemailer = require("nodemailer");
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
+    host: process.env.SMTP_HOST || 'smtp.azurecomm.net',
+    port: Number(process.env.SMTP_PORT || 587),
     secure: false,
+    requireTLS: true,
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
@@ -14,14 +13,17 @@ const transporter = nodemailer.createTransport({
 });
 
 const initiateSMTP = async () => {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.EMAIL_FROM) {
+        throw new Error('SMTP_USER, SMTP_PASS, and EMAIL_FROM must be configured for Azure Communication Services SMTP.');
+    }
+
     try {
-        await transporter.verify((error, success) => {
-            if (error) console.error(`SMTP Connection Error : `, error)
-            if (success) console.log("✓ SMTP Connected");
-        })
-    } catch (err) {
-        console.error(`SMTP connection intiation failed : `, err);
+        await transporter.verify();
+        console.log('✓ Azure Communication Services SMTP connected');
+    } catch (error) {
+        console.error('Azure Communication Services SMTP connection failed:', error);
+        throw error;
     }
 };
 
-module.exports = { initiateSMTP, transporter }
+module.exports = { initiateSMTP, transporter };

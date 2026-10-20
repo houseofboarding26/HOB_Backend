@@ -4,6 +4,27 @@ Routes -------------- Middlewares -------------- controllers
                             |                         |
                           Schema                  Repository        
 
+## Azure Communication Services Email SMTP
+
+Configure these variables in `.env` and in the deployment environment:
+
+```env
+SMTP_HOST=smtp.azurecomm.net
+SMTP_PORT=587
+SMTP_USER=your-acs-smtp-username
+SMTP_PASS=your-entra-application-client-secret
+EMAIL_FROM=Your Sender <donotreply@your-verified-domain>
+```
+
+Create an SMTP username in the Azure Communication Services resource and link it
+to a Microsoft Entra application with permission to send email. Use that SMTP
+username for `SMTP_USER` and one of the linked application's client secrets for
+`SMTP_PASS`. `EMAIL_FROM` must be a sender address on a domain provisioned and
+verified for your Azure Communication Email resource. Keep the client secret in
+environment variables and never commit it. The server verifies SMTP connectivity
+at startup, so missing SMTP credentials or sender configuration, or invalid SMTP
+credentials, prevents startup.
+
 Step 1: Get Google OAuth Credentials
 Go to Google Cloud Console
 Create a new project (or select existing)

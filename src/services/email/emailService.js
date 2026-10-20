@@ -8,24 +8,14 @@ const sendEmail = async ({
     template,
     data
 }) => {
-    try {
-        const html = renderTemplate(template, data);
+    const html = renderTemplate(template, data);
 
-        const response = await transporter.sendMail({
-            from: process.env.EMAIL_FROM,
-            to,
-            subject,
-            html
-        }, (err, info) => {
-            if (info) console.log(info);
-            if (err) console.error(err)
-        });
-        return response
-    } catch (error) {
-        return error
-    }
-
-
+    return transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to,
+        subject,
+        html
+    });
 };
 
 const sendHostApprovedEmail = async (user) => {
