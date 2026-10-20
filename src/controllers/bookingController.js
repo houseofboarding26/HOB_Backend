@@ -4,6 +4,12 @@ const { getHostByIdService, getHostByUserIDService } = require("../services/host
 const { getPetProfileByIdService } = require("../services/petProfileService");
 const { getUserById } = require("../services/userService");
 const { getHostHolidaysByHostIdService } = require("../services/HostHoliday");
+const {
+    sendbookingConfirmationEmailtoCustomer,
+    sendbookingConfirmationEmailtoHost,
+    sendBookingCancellationEmailToCustomer,
+    sendBookingCancellationEmailToHost
+} = require("../services/email/emailService");
 
 
 const getBookingController = async (req, res) => {
@@ -126,8 +132,10 @@ const postBookingController = async (req, res) => {
         }
 
         const hostBoardingPets = host.boardingOfPets || [];
+        const petnames = [];
         for (const petId of uniquePetIds) {
             const petProfile = await getPetProfileByIdService(petId);
+            petnames.push(petProfile.petName);
             if (!petProfile) {
                 return res.status(400).json({
                     success: false,
@@ -153,6 +161,28 @@ const postBookingController = async (req, res) => {
 
         req.body.petIds = uniquePetIds;
         const bookingId = await addBookingService(req.body);
+        const user = await getUserById(userId);
+
+        await sendbookingConfirmationEmailtoCustomer({
+            email: user.email,
+            username: user.name,
+            bookingId,
+            petnames: petnames.join(", "),
+            checkIn: req.body.checkIn,
+            checkOut: req.body.checkOut
+        });
+
+        const hostdata = await getUserById(host.userId);
+        await sendbookingConfirmationEmailtoHost({
+            email: hostdata.email,
+            username: hostdata.name,
+            guestName: user.name,
+            bookingId,
+            petnames: petnames.join(", "),
+            checkIn: req.body.checkIn,
+            checkOut: req.body.checkOut
+        });
+
         return res.status(201).json({
             success: true,
             message: "Booking created successfully",
@@ -192,6 +222,13 @@ const cancelBookingController = async (req, res) => {
         const UserResponse = await getUserById(userId);
         const booking = await getBookingByIdService(bookingId);
 
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: "Booking not found."
+            });
+        }
+
         if (["running", "completed"].includes(booking.status)) {
             return res.status(400).json({
                 success: false,
@@ -221,9 +258,55 @@ const cancelBookingController = async (req, res) => {
         }
 
         const updatedBooking = await cancelBookingService(CancellationData);
+        let cancellationEmailsSent = false;
+
+        try {
+            const customer = await getUserById(booking.userId);
+            const host = await getHostByIdService(booking.hostId);
+            const hostUser = host ? await getUserById(host.userId) : null;
+            const pets = await Promise.all(
+                (booking.petIds || []).map((petId) => getPetProfileByIdService(petId))
+            );
+            const emailBooking = {
+                bookingId: booking.id,
+                petnames: pets.filter(Boolean).map((pet) => pet.petName).join(", "),
+                checkIn: booking.checkIn,
+                checkOut: booking.checkOut,
+                cancellationBy: CancellationData.cancellationBy,
+                cancellationReason: CancellationData.cancellationReason
+            };
+
+            if (!customer || !hostUser) {
+                throw new Error("Could not find the customer or host for cancellation notifications.");
+            }
+
+            const emailResults = await Promise.allSettled([
+                sendBookingCancellationEmailToCustomer({
+                    ...emailBooking,
+                    email: customer.email,
+                    name: customer.name
+                }),
+                sendBookingCancellationEmailToHost({
+                    ...emailBooking,
+                    email: hostUser.email,
+                    name: hostUser.name,
+                    guestName: customer.name
+                })
+            ]);
+            cancellationEmailsSent = emailResults.every((result) => result.status === "fulfilled");
+            emailResults.forEach((result) => {
+                if (result.status === "rejected") {
+                    console.error("Booking cancellation email failed:", result.reason);
+                }
+            });
+        } catch (error) {
+            console.error("Could not send booking cancellation emails:", error.message);
+        }
+
         return res.status(200).json({
             success: true,
             message: "Booking canceled successfully",
+            cancellationEmailsSent,
             booking: updatedBooking
         });
     } catch (error) {

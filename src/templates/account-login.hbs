@@ -1,142 +1,23 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="x-apple-disable-message-reformatting">
-<meta name="color-scheme" content="light">
-<title>House of Boarding</title>
-<!--[if mso]>
-<noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
-<![endif]-->
-<style>
-  /* ===== BRAND SETTINGS (yahin se colors change karein) =====
-     Primary color  : #1F3A5F  (header, footer, headings)
-     Accent color   : #F28C28  (button, highlights)
-     Light bg       : #F4F6F9
-     Text color     : #333333
-     Inko find & replace se apne brand hex codes se badal dein.
-  ============================================================ */
-  body, table, td, a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
-  table, td { mso-table-lspace:0pt; mso-table-rspace:0pt; }
-  img { -ms-interpolation-mode:bicubic; border:0; outline:none; text-decoration:none; display:block; }
-  body { margin:0 !important; padding:0 !important; width:100% !important; background-color:#F4F6F9; }
-  a { color:#F28C28; }
-  @media only screen and (max-width:620px) {
-    .container { width:100% !important; }
-    .px { padding-left:20px !important; padding-right:20px !important; }
-    .stack { display:block !important; width:100% !important; }
-    .h1 { font-size:24px !important; line-height:32px !important; }
-    .btn a { display:block !important; }
-  }
-</style>
-</head>
-<body style="margin:0;padding:0;background-color:#F4F6F9;">
-
-<!-- Preheader (inbox preview text) -->
-<div style="display:none;font-size:1px;color:#F4F6F9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
-  You have successfully signed in to your House of Boarding account.
-</div>
-
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F4F6F9;">
 <tr>
-<td align="center" style="padding:24px 12px;">
-
-  <!-- Main container -->
-  <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background-color:#FFFFFF;border-radius:8px;overflow:hidden;">
-
-    <!-- HEADER / LOGO -->
-    <tr>
-      <td align="center" style="background-color:#ffffff;padding:28px 24px;">
-        <a href="https://www.houseofboarding.com/" target="_blank" style="text-decoration:none;">
-          <!-- LOGO: apna logo ka public URL yahan daalein (PNG, 400px wide, transparent/white version best) -->
-          <img src="https://www.houseofboarding.com/assets/hob-logo-CY0XlYHz.png" alt="House of Boarding" width="180" style="width:180px;max-width:180px;height:auto;margin:0 auto;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;color:#FFFFFF;">
-        </a>
-      </td>
-    </tr>
-
-    <!-- ACCENT STRIP -->
-    <tr><td style="background-color:#F28C28;height:4px;line-height:4px;font-size:4px;">&nbsp;</td></tr>
-
-    <!-- HERO / HEADING -->
-    <tr>
-      <td class="px" style="padding:36px 40px 8px 40px;font-family:Arial,Helvetica,sans-serif;">
-        <h1 class="h1" style="margin:0;font-size:28px;line-height:36px;color:#1F3A5F;font-weight:bold;">
-          You signed in successfully
-        </h1>
-      </td>
-    </tr>
-
-    <!-- BODY CONTENT -->
-    <tr>
-      <td class="px" style="padding:12px 40px 8px 40px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#333333;">
-        <p style="margin:0 0 16px 0;">Hello {{name}},</p>
-        <p style="margin:0 0 16px 0;">
-          You have successfully signed in to your House of Boarding account using Google.
-        </p>
-        <p style="margin:0 0 16px 0;">
-          If this was you, no further action is needed. If you don't recognize this sign-in, secure your Google account and contact us through our website.
-        </p>
-      </td>
-    </tr>
-
-    <!-- CTA BUTTON -->
-    <tr>
-      <td class="px" align="center" style="padding:28px 40px 12px 40px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="btn">
-          <tr>
-            <td align="center" bgcolor="#F28C28" style="border-radius:6px;">
-              <!--[if mso]>
-              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{app_url}}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="12%" stroke="f" fillcolor="#F28C28">
-                <w:anchorlock/>
-                <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Open House of Boarding</center>
-              </v:roundrect>
-              <![endif]-->
-              <!--[if !mso]><!-- -->
-              <a href="{{app_url}}" target="_blank" style="display:inline-block;padding:14px 34px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:6px;background-color:#F28C28;">
-                Open House of Boarding
-              </a>
-              <!--<![endif]-->
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <!-- CLOSING -->
-    <tr>
-      <td class="px" style="padding:20px 40px 36px 40px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#333333;">
-        <p style="margin:0 0 4px 0;">Warm regards,</p>
-        <p style="margin:0;"><strong style="color:#1F3A5F;">Team House of Boarding</strong></p>
-      </td>
-    </tr>
-
-    <!-- DIVIDER -->
-    <tr><td style="padding:0 40px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:1px solid #E3E7ED;font-size:1px;line-height:1px;">&nbsp;</td></tr></table></td></tr>
-
-    <!-- FOOTER -->
-    <tr>
-      <td align="center" class="px" style="background-color:#FFFFFF;padding:26px 40px 10px 40px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;color:#6B7280;">
-        <strong style="color:#1F3A5F;font-size:14px;">House of Boarding</strong><br>
-        <a href="https://www.houseofboarding.com/" target="_blank" style="color:#F28C28;text-decoration:none;font-weight:bold;">www.houseofboarding.com</a>
-      </td>
-    </tr>
-
-    <!-- LEGAL -->
-    <tr>
-      <td align="center" class="px" style="background-color:#1F3A5F;padding:18px 40px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#C9D3E0;">
-        &copy; 2026 House of Boarding. All rights reserved.<br>
-        You are receiving this email because you contacted or registered with House of Boarding.
-      </td>
-    </tr>
-
-  </table>
-  <!-- /Main container -->
-
-</td>
+  <td class="px" style="padding:36px 40px 8px;font-family:Arial,Helvetica,sans-serif;">
+    <h1 class="h1" style="margin:0;font-size:28px;line-height:36px;color:#1F3A5F;font-weight:bold;">You signed in successfully</h1>
+  </td>
 </tr>
-</table>
-
-</body>
-</html>
+<tr>
+  <td class="px" style="padding:12px 40px 8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#333333;">
+    <p style="margin:0 0 16px;">Hello {{name}},</p>
+    <p style="margin:0 0 16px;">You have successfully signed in to your House of Boarding account using Google.</p>
+    <p style="margin:0 0 16px;">If this was you, no further action is needed. If you don't recognize this sign-in, secure your Google account and contact us through our website.</p>
+  </td>
+</tr>
+<tr>
+  <td class="px" align="center" style="padding:28px 40px 12px;">
+    <a href="{{app_url}}" target="_blank" style="display:inline-block;padding:14px 34px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:6px;background-color:#F28C28;">Open House of Boarding</a>
+  </td>
+</tr>
+<tr>
+  <td class="px" style="padding:20px 40px 36px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#333333;">
+    <p style="margin:0 0 4px;">Warm regards,</p>
+    <p style="margin:0;"><strong style="color:#1F3A5F;">Team House of Boarding</strong></p>
+  </td>
+</tr>
