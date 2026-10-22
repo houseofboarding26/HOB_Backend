@@ -26,8 +26,8 @@ const getUsers = async (page = 1, limit = 10, name = '', email = '', hostStatus 
     const offset = (page - 1) * limit;
 
     const where = {};
-    if (name) where.name = { [Op.like]: `%${name}%` };
-    if (email) where.email = { [Op.like]: `%${email}%` };
+    if (name) where.name = { [Op.iLike]: `%${name}%` };
+    if (email) where.email = { [Op.iLike]: `%${email}%` };
     if (role) where.role = { [Op.eq]: `${role}` };
 
     const hostInclude = hostStatus

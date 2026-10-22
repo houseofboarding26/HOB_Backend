@@ -18,10 +18,10 @@ const getPetProfilesService = async (page = 1, limit = 10, name = '', email = ''
         where.userId = userId;
     }
     if (name) {
-        where.name = { [Op.like]: `%${name}%` };
+        where.name = { [Op.iLike]: `%${name}%` };
     }
     if (email) {
-        where.email = { [Op.like]: `%${email}%` };
+        where.email = { [Op.iLike]: `%${email}%` };
     }
     const { count, rows } = await PetProfile.findAndCountAll({
         where,

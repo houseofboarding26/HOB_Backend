@@ -219,7 +219,7 @@ const updateHostHolidayStatusService = async (req, res) => {
                         id: holiday.hostId,
                         status: "suspend",
                         accountSuspendReason: {
-                            [Op.like]: "Host holiday:%"
+                            [Op.iLike]: "Host holiday:%"
                         }
                     }
                 }

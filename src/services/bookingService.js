@@ -23,13 +23,13 @@ const getBookingService = async (
 
     const where = {};
     if (userId) {
-        where.userId = { [Op.like]: `%${userId}%` };
+        where.userId = { [Op.iLike]: `%${userId}%` };
     }
     if (hostId) {
-        where.hostId = { [Op.like]: `%${hostId}%` };
+        where.hostId = { [Op.iLike]: `%${hostId}%` };
     }
     if (status) {
-        where.status = { [Op.like]: `%${status}%` };
+        where.status = { [Op.iLike]: `%${status}%` };
     }
     const { count, rows } = await Booking.findAndCountAll({
         where,
@@ -212,13 +212,13 @@ const getAllBookingService = async (
 
     const where = {};
     if (userId) {
-        where.userId = { [Op.like]: `%${userId}%` };
+        where.userId = { [Op.iLike]: `%${userId}%` };
     }
     if (status) {
-        where.status = { [Op.like]: `%${status}%` };
+        where.status = { [Op.iLike]: `%${status}%` };
     }
     if (id) {
-        where.id = { [Op.like]: `%${id}%` };
+        where.id = { [Op.iLike]: `%${id}%` };
     }
     const { count, rows } = await Booking.findAndCountAll({
         where,
@@ -232,7 +232,7 @@ const getAllBookingService = async (
                 where: customerName
                     ? {
                         name: {
-                            [Op.like]: `%${customerName}%`
+                            [Op.iLike]: `%${customerName}%`
                         }
                     }
                     : undefined
@@ -246,7 +246,7 @@ const getAllBookingService = async (
                 where: hostName
                     ? {
                         propertyName: {
-                            [Op.like]: `%${hostName}%`
+                            [Op.iLike]: `%${hostName}%`
                         }
                     }
                     : undefined
@@ -326,15 +326,15 @@ const getAllBookingOfHost = async (
     const where = {};
 
     if (hostId) {
-        where.hostId = { [Op.like]: `%${hostId}%` };
+        where.hostId = { [Op.iLike]: `%${hostId}%` };
     }
 
     if (status) {
-        where.status = { [Op.like]: `%${status}%` };
+        where.status = { [Op.iLike]: `%${status}%` };
     }
 
     if (id) {
-        where.id = { [Op.like]: `%${id}%` };
+        where.id = { [Op.iLike]: `%${id}%` };
     }
 
     if (createdAtFrom || createdAtTo) {
@@ -383,7 +383,7 @@ const getAllBookingOfHost = async (
                 where: customerName
                     ? {
                         name: {
-                            [Op.like]: `%${customerName}%`
+                            [Op.iLike]: `%${customerName}%`
                         }
                     }
                     : undefined

@@ -154,7 +154,7 @@ const getHostsService = async (
     const where = {};
 
     if (propertyName) {
-        where.propertyName = { [Op.like]: `%${propertyName}%` };
+        where.propertyName = { [Op.iLike]: `%${propertyName}%` };
     }
 
     if (status) {
@@ -215,7 +215,7 @@ const getHostsService = async (
     }
 
     if (nameOfBusiness) {
-        where.nameOfBusiness = { [Op.like]: `%${nameOfBusiness}%` };
+        where.nameOfBusiness = { [Op.iLike]: `%${nameOfBusiness}%` };
     }
 
     if (boardingOfPets) {
@@ -298,7 +298,7 @@ const getHostForAdminsService = async (
 
     const where = {};
     if (name) {
-        where.name = { [Op.like]: `%${name}%` };
+        where.name = { [Op.iLike]: `%${name}%` };
     }
 
     if (status) {
@@ -314,7 +314,7 @@ const getHostForAdminsService = async (
     }
 
     if (nameOfBusiness) {
-        where.nameOfBusiness = { [Op.like]: `%${nameOfBusiness}%` };
+        where.nameOfBusiness = { [Op.iLike]: `%${nameOfBusiness}%` };
     }
 
     if (boardingOfPets) {

@@ -31,19 +31,19 @@ const getAllPaymentsService = async (
 
      const where = {};
         if (orderId) {
-            where.orderId = { [Op.like]: `%${orderId}%` };
+            where.orderId = { [Op.iLike]: `%${orderId}%` };
         }
 
         if (paymentId) {
-            where.paymentId = { [Op.like]: `%${paymentId}%` };
+            where.paymentId = { [Op.iLike]: `%${paymentId}%` };
         }
 
         if (bookingId) {
-            where.bookingId = { [Op.like]: `%${bookingId}%` };
+            where.bookingId = { [Op.iLike]: `%${bookingId}%` };
         }
 
         if (status) {
-            where.status = { [Op.like]: `%${status}%` };
+            where.status = { [Op.iLike]: `%${status}%` };
         }
 
     const { count, rows } = await Payment.findAndCountAll({
