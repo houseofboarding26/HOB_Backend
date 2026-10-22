@@ -1,6 +1,11 @@
 const crypto = require('crypto');
 const { createPaymentOrder, fetchPaymentDetails } = require('../services/razorpay/razorpayService');
 const { addPaymentService, updatePaymentService, getAllPaymentsService } = require('../services/paymentService');
+const { getBookingByIdService } = require('../services/bookingService');
+const { getPetProfileByIdService } = require('../services/petProfileService');
+const { getUserById } = require('../services/userService');
+const { sendbookingConfirmationEmailtoHost } = require('../services/email/emailService');
+const { getHostByIdService } = require('../services/hostService');
 
 const createOrder = async (req, res) => {
     try {
@@ -81,6 +86,37 @@ const verifyPayment = async (req, res) => {
         await updatePaymentService(razorpay_order_id, {
             paymentId: payment.id,
             status: payment.status
+        });
+
+        // email to customer
+        const booking = await getBookingByIdService(payment.bookingId);
+        const user = await getUserById(booking.userId);
+        const petnames = [];
+        const uniquePetIds = [...new Set(booking.petIds)];
+        for (const petId of uniquePetIds) {
+            const petProfile = await getPetProfileByIdService(petId);
+            petnames.push(petProfile.petName);
+        }
+        await sendbookingConfirmationEmailtoCustomer({
+            email: user.email,
+            username: user.name,
+            bookingId: booking.id,
+            petnames: petnames.join(", "),
+            checkIn: booking.checkIn,
+            checkOut: booking.checkOut
+        });
+
+        // email for Host
+        const host = await getHostByIdService(booking.hostId);
+        const hostdata = await getUserById(host.userId);
+        await sendbookingConfirmationEmailtoHost({
+            email: hostdata.email,
+            username: hostdata.name,
+            guestName: user.name,
+            bookingId: booking.id,
+            petnames: petnames.join(", "),
+            checkIn: booking.checkIn,
+            checkOut: booking.checkOut
         });
 
         return res.status(200).json({

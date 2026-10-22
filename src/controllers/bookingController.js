@@ -1,12 +1,10 @@
 const { success } = require("zod");
 const { getBookingService, getBookingByIdService, addBookingService, updateBookingStatusByTimeService, cancelBookingService, getAllBookingService, getAllBookingOfHost } = require("../services/bookingService");
-const { getHostByIdService, getHostByUserIDService } = require("../services/hostService");
+const { getHostByIdService } = require("../services/hostService");
 const { getPetProfileByIdService } = require("../services/petProfileService");
 const { getUserById } = require("../services/userService");
 const { getHostHolidaysByHostIdService } = require("../services/HostHoliday");
 const {
-    sendbookingConfirmationEmailtoCustomer,
-    sendbookingConfirmationEmailtoHost,
     sendBookingCancellationEmailToCustomer,
     sendBookingCancellationEmailToHost
 } = require("../services/email/emailService");
@@ -161,27 +159,6 @@ const postBookingController = async (req, res) => {
 
         req.body.petIds = uniquePetIds;
         const bookingId = await addBookingService(req.body);
-        const user = await getUserById(userId);
-
-        await sendbookingConfirmationEmailtoCustomer({
-            email: user.email,
-            username: user.name,
-            bookingId,
-            petnames: petnames.join(", "),
-            checkIn: req.body.checkIn,
-            checkOut: req.body.checkOut
-        });
-
-        const hostdata = await getUserById(host.userId);
-        await sendbookingConfirmationEmailtoHost({
-            email: hostdata.email,
-            username: hostdata.name,
-            guestName: user.name,
-            bookingId,
-            petnames: petnames.join(", "),
-            checkIn: req.body.checkIn,
-            checkOut: req.body.checkOut
-        });
 
         return res.status(201).json({
             success: true,

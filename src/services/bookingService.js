@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, literal } = require('sequelize');
 const { Booking: getBookingModel } = require('../models/bookingModel');
 const { PetProfile: getPetProfileModel } = require('../models/petProfileModel');
 const { getPaymentModel } = require('../models/paymentModel');
@@ -17,29 +17,65 @@ const getBookingService = async (
     hostId = ''
 ) => {
     const Booking = getBookingModel();
+    const PetProfile = getPetProfileModel();
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
 
     const where = {};
     if (userId) {
-        where.userId = userId;
+        where.userId = `${userId}`;
     }
     if (hostId) {
-        where.hostId = hostId;
+        where.hostId = `${hostId}`;
     }
     if (status) {
-        where.status = status;
+        where.status = `${status}`;
     }
+
+    const queryGenerator = Booking.sequelize.getQueryInterface().queryGenerator;
+    const bookingAlias = queryGenerator.quoteIdentifier(Booking.name);
+    const petAlias = queryGenerator.quoteIdentifier('petProfileForBooking');
+    const petTable = queryGenerator.quoteTable(PetProfile.getTableName());
+    const bookingPetIds = `${bookingAlias}.${queryGenerator.quoteIdentifier(Booking.rawAttributes.petIds.field || 'petIds')}`;
+    const petId = `${petAlias}.${queryGenerator.quoteIdentifier(PetProfile.rawAttributes.id.field || 'id')}`;
+    const petName = `${petAlias}.${queryGenerator.quoteIdentifier(PetProfile.rawAttributes.petName.field || 'petName')}`;
+
     const { count, rows } = await Booking.findAndCountAll({
         where,
+        include: [
+            {
+                association: Booking.associations.customer,
+                attributes: ['name']
+            },
+            {
+                association: Booking.associations.host,
+                attributes: ['propertyName']
+            }
+        ],
+        attributes: {
+            include: [[literal(`(
+                SELECT COALESCE(json_agg(${petName} ORDER BY pet_ids.ordinality), '[]'::json)
+                FROM json_array_elements_text(COALESCE(${bookingPetIds}::json, '[]'::json))
+                    WITH ORDINALITY AS pet_ids(pet_id, ordinality)
+                INNER JOIN ${petTable} AS ${petAlias}
+                    ON ${petId}::text = pet_ids.pet_id
+            )`), 'petNames']]
+        },
         limit,
         order: [['createdAt', 'DESC']],
         offset
     });
 
     return {
-        data: rows,
+        data: rows.map((row) => {
+            const booking = row.toJSON();
+            return {
+                ...booking,
+                username: booking.customer?.name || null,
+                hostName: booking.host?.propertyName || null
+            };
+        }),
         total: count,
         page: page,
         limit: limit,
@@ -215,7 +251,7 @@ const getAllBookingService = async (
         where.userId = userId;
     }
     if (status) {
-        where.status = status;
+        where.status = { [Op.iLike]: `%${status}%` };
     }
     if (id) {
         where.id = id;
@@ -330,7 +366,7 @@ const getAllBookingOfHost = async (
     }
 
     if (status) {
-        where.status = status;
+        where.status = { [Op.iLike]: `%${status}%` };
     }
 
     if (id) {
