@@ -67,10 +67,20 @@ const getHostHolidaysService = async (page = 1, limit = 10, hostName = '', fromD
         where.hostName = { [Op.iLike]: `%${hostName}%` };
     }
     if (fromDate) {
-        where.fromDate = { [Op.iLike]: `%${fromDate}%` };
+        const startDate = new Date(`${fromDate}T00:00:00.000Z`);
+        if (Number.isNaN(startDate.getTime())) {
+            throw new Error('fromDate must be a valid date');
+        }
+        const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
+        where.fromDate = { [Op.gte]: startDate, [Op.lt]: endDate };
     }
     if (toDate) {
-        where.toDate = { [Op.iLike]: `%${toDate}%` };
+        const startDate = new Date(`${toDate}T00:00:00.000Z`);
+        if (Number.isNaN(startDate.getTime())) {
+            throw new Error('toDate must be a valid date');
+        }
+        const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
+        where.toDate = { [Op.gte]: startDate, [Op.lt]: endDate };
     }
     if (userId) {
         where.hostId = userId;

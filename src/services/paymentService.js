@@ -39,7 +39,7 @@ const getAllPaymentsService = async (
         }
 
         if (bookingId) {
-            where.bookingId = { [Op.iLike]: `%${bookingId}%` };
+            where.bookingId = bookingId;
         }
 
         if (status) {

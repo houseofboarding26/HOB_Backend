@@ -23,13 +23,13 @@ const getBookingService = async (
 
     const where = {};
     if (userId) {
-        where.userId = { [Op.iLike]: `%${userId}%` };
+        where.userId = userId;
     }
     if (hostId) {
         where.hostId = hostId;
     }
     if (status) {
-        where.status = { [Op.iLike]: `%${status}%` };
+        where.status = status;
     }
     const { count, rows } = await Booking.findAndCountAll({
         where,
@@ -215,7 +215,7 @@ const getAllBookingService = async (
         where.userId = userId;
     }
     if (status) {
-        where.status = { [Op.iLike]: `%${status}%` };
+        where.status = status;
     }
     if (id) {
         where.id = id;
@@ -330,7 +330,7 @@ const getAllBookingOfHost = async (
     }
 
     if (status) {
-        where.status = { [Op.iLike]: `%${status}%` };
+        where.status = status;
     }
 
     if (id) {
