@@ -26,7 +26,7 @@ const getBookingService = async (
         where.userId = { [Op.iLike]: `%${userId}%` };
     }
     if (hostId) {
-        where.hostId = { [Op.iLike]: `%${hostId}%` };
+        where.hostId = hostId;
     }
     if (status) {
         where.status = { [Op.iLike]: `%${status}%` };
@@ -212,13 +212,13 @@ const getAllBookingService = async (
 
     const where = {};
     if (userId) {
-        where.userId = { [Op.iLike]: `%${userId}%` };
+        where.userId = userId;
     }
     if (status) {
         where.status = { [Op.iLike]: `%${status}%` };
     }
     if (id) {
-        where.id = { [Op.iLike]: `%${id}%` };
+        where.id = id;
     }
     const { count, rows } = await Booking.findAndCountAll({
         where,
@@ -326,7 +326,7 @@ const getAllBookingOfHost = async (
     const where = {};
 
     if (hostId) {
-        where.hostId = { [Op.iLike]: `%${hostId}%` };
+        where.hostId = hostId;
     }
 
     if (status) {
@@ -334,7 +334,7 @@ const getAllBookingOfHost = async (
     }
 
     if (id) {
-        where.id = { [Op.iLike]: `%${id}%` };
+        where.id = id;
     }
 
     if (createdAtFrom || createdAtTo) {

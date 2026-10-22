@@ -61,7 +61,7 @@ const getHostHolidaysService = async (page = 1, limit = 10, hostName = '', fromD
 
     const where = {};
     if (hostId) {
-        where.hostId = { [Op.iLike]: `%${hostId}%` };
+        where.hostId = hostId;
     }
     if (hostName) {
         where.hostName = { [Op.iLike]: `%${hostName}%` };
@@ -73,7 +73,7 @@ const getHostHolidaysService = async (page = 1, limit = 10, hostName = '', fromD
         where.toDate = { [Op.iLike]: `%${toDate}%` };
     }
     if (userId) {
-        where.hostId = { [Op.iLike]: `%${userId}%` };
+        where.hostId = userId;
     }
     const { count, rows } = await HostHoliday.findAndCountAll({
         where,
