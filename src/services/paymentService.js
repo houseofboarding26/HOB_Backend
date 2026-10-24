@@ -15,6 +15,14 @@ const updatePaymentService = async (orderId, updateData) => {
     return updatedRows;
 }
 
+const getPaymentByPaymentIdService = async (paymentId) => {
+    const Payment = getPaymentModel();
+    const payment = await Payment.findOne({
+        where: { paymentId: paymentId }
+    });
+    return payment;
+};
+
 // ************ for admin use only ***********
 const getAllPaymentsService = async (
     page = 1,
@@ -65,5 +73,6 @@ const getAllPaymentsService = async (
 module.exports = {
     addPaymentService,
     updatePaymentService,
+    getPaymentByPaymentIdService,
     getAllPaymentsService
 };

@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { createPaymentOrder, fetchPaymentDetails } = require('../services/razorpay/razorpayService');
-const { addPaymentService, updatePaymentService, getAllPaymentsService } = require('../services/paymentService');
+const { addPaymentService, updatePaymentService, getAllPaymentsService, getPaymentByPaymentIdService } = require('../services/paymentService');
 const { getBookingByIdService } = require('../services/bookingService');
 const { getPetProfileByIdService } = require('../services/petProfileService');
 const { getUserById } = require('../services/userService');
@@ -89,7 +89,8 @@ const verifyPayment = async (req, res) => {
         });
 
         // email to customer
-        const booking = await getBookingByIdService(payment.bookingId);
+        const paymentDetails = await getPaymentByPaymentIdService(payment.id);
+        const booking = await getBookingByIdService(paymentDetails.bookingId);
         const user = await getUserById(booking.userId);
         const petnames = [];
         const uniquePetIds = [...new Set(booking.petIds)];
