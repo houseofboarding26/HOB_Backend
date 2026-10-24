@@ -1,4 +1,4 @@
-const { Op, literal } = require('sequelize');
+const { Op, fn, col, literal } = require('sequelize');
 const { Booking: getBookingModel } = require('../models/bookingModel');
 const { PetProfile: getPetProfileModel } = require('../models/petProfileModel');
 const { getPaymentModel } = require('../models/paymentModel');
@@ -73,7 +73,8 @@ const getBookingService = async (
             return {
                 ...booking,
                 username: booking.customer?.name || null,
-                hostName: booking.host?.propertyName || null
+                hostName: booking.host?.propertyName || null,
+                propertyName: booking.host?.propertyName || null
             };
         }),
         total: count,
@@ -88,6 +89,77 @@ const getBookingByIdService = async (BookingId) => {
     const booking = await Booking.findByPk(BookingId);
     return booking;
 }
+
+const getBookingAndPaymentSummaryService = async (hostId = '') => {
+    try {
+        const Booking = getBookingModel();
+        const Payment = getPaymentModel();
+        const now = new Date();
+        const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+        const startOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+        const bookingWhere = {
+            ...(hostId ? { hostId } : {}),
+            createdAt: {
+                [Op.gte]: startOfMonth,
+                [Op.lt]: startOfNextMonth
+            }
+        };
+
+        const [bookingCounts, capturedPayments] = await Promise.all([
+            Booking.findAll({
+                where: bookingWhere,
+                attributes: [
+                    'status',
+                    [fn('COUNT', col('id')), 'count']
+                ],
+                group: ['status'],
+                raw: true
+            }),
+            Payment.findOne({
+                where: {
+                    status: 'captured',
+                    updatedAt: {
+                        [Op.gte]: startOfMonth,
+                        [Op.lt]: startOfNextMonth
+                    }
+                },
+                include: hostId
+                    ? [{
+                        association: Payment.associations.booking,
+                        attributes: [],
+                        where: { hostId, status: 'completed' },
+                        required: true
+                    }]
+                    : [],
+                attributes: [
+                    [fn('COUNT', col('Payment.id')), 'count'],
+                    [fn('COALESCE', fn('SUM', col('Payment.amount')), 0), 'totalAmount']
+                ],
+                raw: true
+            })
+        ]);
+
+        const summary = {
+            initiated: 0,
+            running: 0,
+            completed: 0,
+            cancelled: 0,
+            totalAmount: capturedPayments?.totalAmount || '0'
+        };
+
+        for (const bookingCount of bookingCounts) {
+            if (Object.prototype.hasOwnProperty.call(summary, bookingCount.status)) {
+                summary[bookingCount.status] = Number(bookingCount.count);
+            }
+        }
+
+        return summary;
+    }
+    catch (error) {
+        console.error('Error in getBookingAndPaymentSummaryService:', error);
+        throw error;
+    }
+};
 
 const cancelUnpaidBookingsService = async (startOfToday) => {
     try {
@@ -483,6 +555,7 @@ module.exports = {
     addBookingService,
     getBookingService,
     getBookingByIdService,
+    getBookingAndPaymentSummaryService,
     updateBookingStatusByTimeService,
     cancelBookingService,
     getAllBookingService,

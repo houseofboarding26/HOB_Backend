@@ -1,15 +1,24 @@
 const express = require('express');
 
 const authMiddleware = require('../middleware/authMiddleware');
-const { userIDParamSchema } = require('../schemas/userSchema');
 const { payloadValidation } = require('../middleware/payloadValidation');
 const { createBookingSchema } = require('../schemas/bookingSchema');
-const { getBookingByIdController, postBookingController, getBookingController, updateBookingStatusController, cancelBookingController, getAllBookingsController, getAllBookingsOfHostController } = require('../controllers/bookingController');
+const {
+    getBookingByIdController,
+    postBookingController,
+    getBookingController,
+    updateBookingStatusController,
+    cancelBookingController,
+    getAllBookingsController,
+    getAllBookingsOfHostController,
+    getthisMonthBookingsController
+} = require('../controllers/bookingController');
 const { AdminRoleCheck } = require('../middleware/RoleCHeck');
 
 const bookingRoutes = express.Router();
 bookingRoutes.get('/get', authMiddleware, getBookingController);
 bookingRoutes.get('/get/:id', authMiddleware, getBookingByIdController);
+bookingRoutes.get('/get_this_month_bookings', authMiddleware, getthisMonthBookingsController);
 bookingRoutes.post('/add', authMiddleware, payloadValidation(createBookingSchema), postBookingController);
 bookingRoutes.put('/cancel/:id', authMiddleware, cancelBookingController);
 

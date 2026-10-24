@@ -1,5 +1,5 @@
 const { success } = require("zod");
-const { getBookingService, getBookingByIdService, addBookingService, updateBookingStatusByTimeService, cancelBookingService, getAllBookingService, getAllBookingOfHost } = require("../services/bookingService");
+const { getBookingService, getBookingByIdService, addBookingService, updateBookingStatusByTimeService, cancelBookingService, getAllBookingService, getAllBookingOfHost, getBookingAndPaymentSummaryService } = require("../services/bookingService");
 const { getHostByIdService } = require("../services/hostService");
 const { getPetProfileByIdService } = require("../services/petProfileService");
 const { getUserById } = require("../services/userService");
@@ -31,6 +31,17 @@ const getBookingByIdController = async (req, res) => {
         res.json(booking);
     } catch (error) {
         console.error('Error in getBookingById Controller:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getthisMonthBookingsController = async (req, res) => {
+    try {
+        const { hostId } = req.query;
+        const bookings = await getBookingAndPaymentSummaryService(hostId);
+        res.json(bookings);
+    } catch (error) {
+        console.error('Error in getthisMonthBookings Controller:', error.message);
         res.status(500).json({ error: error.message });
     }
 };
@@ -370,9 +381,10 @@ const getAllBookingsOfHostController = async (req, res) => {
 module.exports = {
     getBookingController,
     getBookingByIdController,
+    getthisMonthBookingsController,
     postBookingController,
     updateBookingStatusController,
     cancelBookingController,
     getAllBookingsController,
     getAllBookingsOfHostController
-}
+};
