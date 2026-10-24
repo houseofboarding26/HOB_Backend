@@ -4,7 +4,7 @@ const { addPaymentService, updatePaymentService, getAllPaymentsService, getPayme
 const { getBookingByIdService } = require('../services/bookingService');
 const { getPetProfileByIdService } = require('../services/petProfileService');
 const { getUserById } = require('../services/userService');
-const { sendbookingConfirmationEmailtoHost } = require('../services/email/emailService');
+const { sendbookingConfirmationEmailtoHost, sendbookingConfirmationEmailtoCustomer } = require('../services/email/emailService');
 const { getHostByIdService } = require('../services/hostService');
 
 const createOrder = async (req, res) => {
