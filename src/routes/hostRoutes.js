@@ -26,7 +26,6 @@ hostRoutes.put('/put/:id',
     authMiddleware,
     HostRoleCheck,
     updateHostFiles,
-
     payloadValidation(updateHostSchema),
     uploadHostfiles,
     putHostProperty);

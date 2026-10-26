@@ -3,14 +3,6 @@ const { getHostByUserIDService } = require("../services/hostService");
 
 const getHostHolidayController = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const host = await getHostByUserIDService(userId);
-        if (!host) {
-            return res.status(400).json({
-                success: false,
-                error: 'User is not a host'
-            });
-        }
         const { page, limit, hostName, fromDate, toDate, hostId } = req.query;
         const hostHolidays = await getHostHolidaysService(page, limit, hostName, fromDate, toDate, hostId, host.id);
         res.json(hostHolidays);
