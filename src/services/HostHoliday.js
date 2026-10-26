@@ -59,8 +59,7 @@ const getHostHolidaysService = async (
     hostName = '',
     fromDate = '',
     toDate = '',
-    hostId,
-    userId
+    hostId
 ) => {
     try {
         const HostHoliday = getHostHolidayModel();
@@ -90,9 +89,6 @@ const getHostHolidaysService = async (
             }
             const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
             where.toDate = { [Op.gte]: startDate, [Op.lt]: endDate };
-        }
-        if (userId) {
-            where.hostId = userId;
         }
         const { count, rows } = await HostHoliday.findAndCountAll({
             where,

@@ -8,7 +8,7 @@ const jsonTextContains = (field, value) =>
     Sequelize.literal(`
         EXISTS (
             SELECT 1
-            FROM jsonb_array_elements_text(COALESCE(${field}::jsonb, '[]'::jsonb)) AS item
+            FROM jsonb_array_elements_text(COALESCE("Host"."${field}"::jsonb, '[]'::jsonb)) AS item
             WHERE item = '${escapeSqlString(value)}'
         )
     `);
@@ -17,7 +17,7 @@ const jsonObjectContainsKeyValue = (field, key, value) =>
     Sequelize.literal(`
         EXISTS (
             SELECT 1
-            FROM jsonb_array_elements(COALESCE(${field}::jsonb, '[]'::jsonb)) AS item
+            FROM jsonb_array_elements(COALESCE("Host"."${field}"::jsonb, '[]'::jsonb)) AS item
             WHERE item->>'${key}' = '${escapeSqlString(value)}'
         )
     `);
@@ -200,7 +200,7 @@ const getHostsService = async (
             Sequelize.literal(`
                 EXISTS (
                     SELECT 1
-                    FROM jsonb_array_elements(COALESCE(pricePerPet::jsonb, '[]'::jsonb)) AS price_data
+                    FROM jsonb_array_elements(COALESCE("Host"."pricePerPet"::jsonb, '[]'::jsonb)) AS price_data
                     WHERE (
                         price_data->>'petType' = 'Dog'
                         AND COALESCE((price_data->'small'->>'price')::numeric, 0) BETWEEN ${min} AND ${max}

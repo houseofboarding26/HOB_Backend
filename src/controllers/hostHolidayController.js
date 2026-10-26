@@ -3,15 +3,14 @@ const { getHostByUserIDService } = require("../services/hostService");
 
 const getHostHolidayController = async (req, res) => {
     try {
-        const { page, limit, hostName, fromDate, toDate, hostId, userId } = req.query;
+        const { page, limit, hostName, fromDate, toDate, hostId } = req.query;
         const hostHolidays = await getHostHolidaysService(
             page,
             limit,
             hostName,
             fromDate,
             toDate,
-            hostId,
-            userId
+            hostId
         );
         res.json(hostHolidays);
     } catch (error) {
