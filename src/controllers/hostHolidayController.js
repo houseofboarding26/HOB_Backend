@@ -3,8 +3,16 @@ const { getHostByUserIDService } = require("../services/hostService");
 
 const getHostHolidayController = async (req, res) => {
     try {
-        const { page, limit, hostName, fromDate, toDate, hostId } = req.query;
-        const hostHolidays = await getHostHolidaysService(page, limit, hostName, fromDate, toDate, hostId, host.id);
+        const { page, limit, hostName, fromDate, toDate, hostId, userId } = req.query;
+        const hostHolidays = await getHostHolidaysService(
+            page,
+            limit,
+            hostName,
+            fromDate,
+            toDate,
+            hostId,
+            userId
+        );
         res.json(hostHolidays);
     } catch (error) {
         console.error('Error in getHostHoliday Controller:', error.message);
@@ -18,7 +26,6 @@ const getHostHolidayController = async (req, res) => {
 const getHostHolidayByIdController = async (req, res) => {
     try {
         const Id = req.params.id;
-
         const hostHoliday = await getHostHolidaysByHostIdService(Id);
         if (!hostHoliday) {
             return res.status(404).json({

@@ -53,51 +53,66 @@ const addHostHolidayService = async (holidayData) => {
     return holiday.id;
 };
 
-const getHostHolidaysService = async (page = 1, limit = 10, hostName = '', fromDate = '', toDate = '', hostId, userId) => {
-    const HostHoliday = getHostHolidayModel();
-    page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
-    const offset = (page - 1) * limit;
+const getHostHolidaysService = async (
+    page = 1,
+    limit = 10,
+    hostName = '',
+    fromDate = '',
+    toDate = '',
+    hostId,
+    userId
+) => {
+    try {
+        const HostHoliday = getHostHolidayModel();
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
+        const offset = (page - 1) * limit;
 
-    const where = {};
-    if (hostId) {
-        where.hostId = hostId;
-    }
-    if (hostName) {
-        where.hostName = { [Op.iLike]: `%${hostName}%` };
-    }
-    if (fromDate) {
-        const startDate = new Date(`${fromDate}T00:00:00.000Z`);
-        if (Number.isNaN(startDate.getTime())) {
-            throw new Error('fromDate must be a valid date');
+        const where = {};
+        if (hostId) {
+            where.hostId = hostId;
         }
-        const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
-        where.fromDate = { [Op.gte]: startDate, [Op.lt]: endDate };
-    }
-    if (toDate) {
-        const startDate = new Date(`${toDate}T00:00:00.000Z`);
-        if (Number.isNaN(startDate.getTime())) {
-            throw new Error('toDate must be a valid date');
+        if (hostName) {
+            where.hostName = { [Op.iLike]: `%${hostName}%` };
         }
-        const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
-        where.toDate = { [Op.gte]: startDate, [Op.lt]: endDate };
-    }
-    if (userId) {
-        where.hostId = userId;
-    }
-    const { count, rows } = await HostHoliday.findAndCountAll({
-        where,
-        order: [['createdAt', 'DESC']],
-        limit,
-        offset
-    });
+        if (fromDate) {
+            const startDate = new Date(`${fromDate}T00:00:00.000Z`);
+            if (Number.isNaN(startDate.getTime())) {
+                throw new Error('fromDate must be a valid date');
+            }
+            const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
+            where.fromDate = { [Op.gte]: startDate, [Op.lt]: endDate };
+        }
+        if (toDate) {
+            const startDate = new Date(`${toDate}T00:00:00.000Z`);
+            if (Number.isNaN(startDate.getTime())) {
+                throw new Error('toDate must be a valid date');
+            }
+            const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
+            where.toDate = { [Op.gte]: startDate, [Op.lt]: endDate };
+        }
+        if (userId) {
+            where.hostId = userId;
+        }
+        const { count, rows } = await HostHoliday.findAndCountAll({
+            where,
+            order: [['createdAt', 'DESC']],
+            limit,
+            offset
+        });
 
-    return {
-        data: rows,
-        total: count,
-        page: page,
-        limit: limit,
-        totalPages: Math.ceil(count / limit)
+        return {
+            data: rows,
+            total: count,
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(count / limit)
+        }
+    }
+    catch (error) {
+        console.error('Error in getHostHolidaysService:', error.message);
+        throw new Error('Failed to retrieve host holidays');
+
     };
 }
 
