@@ -344,7 +344,7 @@ const getAllBookingService = async (
         where.userId = userId;
     }
     if (status) {
-        where.status = { [Op.iLike]: `%${status}%` };
+        where.status = `${status}`;
     }
     if (id) {
         where.id = id;
