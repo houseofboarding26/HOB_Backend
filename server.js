@@ -4,6 +4,7 @@ const { initializePool, getSequelize } = require('./src/config/db');
 const { initializeUser } = require('./src/models/User');
 const { initializePassport } = require('./src/config/passport');
 const { tableInitializer } = require('./src/utils/tableInitializer');
+const { PasswordResetOtp } = require('./src/models/PasswordResetOtp');
 const { initiateSMTP } = require('./src/services/email/intiateSMTPConnetion');
 
 dotenv.config();
@@ -18,6 +19,7 @@ const startServer = async () => {
 
         console.log('Initializing models...');
         tableInitializer();
+        await PasswordResetOtp().sync();
         console.log('✓ Models initialized');
 
         console.log('Initializing Passport strategies...');

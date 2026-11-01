@@ -37,6 +37,16 @@ const initializePassport = () => {
           const User = getUser();
           const Customer = getCustomer();
           let user = await User.findOne({ where: { googleId: profile.id } });
+          let userEmail = await User.findOne({ where: { email: profile.emails[0].value } });
+
+          if (!user && userEmail && profile.emails[0].value == userEmail.email) {
+            await User.update(
+              { googleId: profile.id },
+              { where: { email: profile.emails[0].value } }
+            );
+            user = await User.findOne({ where: { email: profile.emails[0].value } });
+            return done(null, user);
+          }
 
           if (!user) {
             user = await User.create({

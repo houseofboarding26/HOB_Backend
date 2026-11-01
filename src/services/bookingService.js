@@ -18,6 +18,7 @@ const getBookingService = async (
 ) => {
     const Booking = getBookingModel();
     const PetProfile = getPetProfileModel();
+    const Payment = getPaymentModel();
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
@@ -37,9 +38,14 @@ const getBookingService = async (
     const bookingAlias = queryGenerator.quoteIdentifier(Booking.name);
     const petAlias = queryGenerator.quoteIdentifier('petProfileForBooking');
     const petTable = queryGenerator.quoteTable(PetProfile.getTableName());
+    const paymentTable = queryGenerator.quoteTable(Payment.getTableName());
     const bookingPetIds = `${bookingAlias}.${queryGenerator.quoteIdentifier(Booking.rawAttributes.petIds.field || 'petIds')}`;
+    const bookingId = `${bookingAlias}.${queryGenerator.quoteIdentifier(Booking.rawAttributes.id.field || 'id')}`;
     const petId = `${petAlias}.${queryGenerator.quoteIdentifier(PetProfile.rawAttributes.id.field || 'id')}`;
     const petName = `${petAlias}.${queryGenerator.quoteIdentifier(PetProfile.rawAttributes.petName.field || 'petName')}`;
+    const paymentBookingId = queryGenerator.quoteIdentifier(Payment.rawAttributes.bookingId.field || 'bookingId');
+    const paymentAmount = queryGenerator.quoteIdentifier(Payment.rawAttributes.amount.field || 'amount');
+    const paymentCreatedAt = queryGenerator.quoteIdentifier(Payment.rawAttributes.createdAt.field || 'createdAt');
 
     const { count, rows } = await Booking.findAndCountAll({
         where,
@@ -54,13 +60,22 @@ const getBookingService = async (
             }
         ],
         attributes: {
-            include: [[literal(`(
+            include: [
+                [literal(`(
                 SELECT COALESCE(json_agg(${petName} ORDER BY pet_ids.ordinality), '[]'::json)
                 FROM json_array_elements_text(COALESCE(${bookingPetIds}::json, '[]'::json))
                     WITH ORDINALITY AS pet_ids(pet_id, ordinality)
                 INNER JOIN ${petTable} AS ${petAlias}
                     ON ${petId}::text = pet_ids.pet_id
-            )`), 'petNames']]
+            )`), 'petNames'],
+                [literal(`(
+                    SELECT ${paymentAmount}
+                    FROM ${paymentTable}
+                    WHERE ${paymentBookingId} = ${bookingId}
+                    ORDER BY ${paymentCreatedAt} DESC
+                    LIMIT 1
+                )`), 'bookingAmount']
+            ]
         },
         limit,
         order: [['createdAt', 'DESC']],
@@ -171,7 +186,7 @@ const cancelUnpaidBookingsService = async (startOfToday) => {
                 status: {
                     [Op.in]: ['initiated', 'running', 'scheduled']
                 },
-                checkIn: {
+                createdAt: {
                     [Op.lt]: startOfToday
                 },
                 '$payments.id$': null
@@ -181,6 +196,12 @@ const cancelUnpaidBookingsService = async (startOfToday) => {
                     model: Payment,
                     as: 'payments',
                     required: false,
+                    where: {
+                        paymentId: {
+                            [Op.not]: null,
+                            [Op.ne]: ''
+                        }
+                    },
                     attributes: ['id']
                 }
             ],

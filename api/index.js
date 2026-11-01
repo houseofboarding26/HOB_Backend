@@ -3,6 +3,7 @@ const { initializePool, getSequelize } = require('../src/config/db');
 const { initializePassport } = require('../src/config/passport');
 const { initiateSMTP } = require('../src/services/email/intiateSMTPConnetion');
 const { tableInitializer } = require('../src/utils/tableInitializer');
+const { PasswordResetOtp } = require('../src/models/PasswordResetOtp');
 
 let initialized = false;
 
@@ -15,6 +16,7 @@ module.exports = async (req, res) => {
             console.log('✓ Database connection established');
 
             tableInitializer();
+            await PasswordResetOtp().sync();
             console.log('✓ Models initialized');
 
             initializePassport();

@@ -1,6 +1,11 @@
 const express = require('express');
 const passport = require('passport');
-const { googleCallback, logout, loginController, forgetPasswordController } = require('../controllers/authController');
+const {
+    googleCallback,
+    loginController,
+    sendOtpController,
+    forgetPasswordController
+} = require('../controllers/authController');
 
 const authRoutes = express.Router();
 
@@ -19,18 +24,7 @@ authRoutes.get('/callback',
 );
 
 authRoutes.post('/login', loginController)
-authRoutes.post('/send-otp', (req, res) => {
-    if (!req.body.email) {
-       return res.status(400).json({
-            message: "email is need",
-            success: false
-        })
-    }
-  return  res.json({
-        message: "OTP send successfully",
-        success: true
-    })
-})
+authRoutes.post('/send-otp', sendOtpController);
 authRoutes.put('/forgetpassword', forgetPasswordController)
 
 

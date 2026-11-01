@@ -7,6 +7,7 @@ const { initializePetProfileModel } = require('../models/petProfileModel');
 const { initializeUser } = require('../models/User');
 const { initializevideosModel } = require('../models/videoModel');
 const { initializeBannersModel } = require('../models/BannersModel');
+const { initializePasswordResetOtp } = require('../models/PasswordResetOtp');
 
 function tableInitializer() {
     initializeUser();
@@ -18,6 +19,7 @@ function tableInitializer() {
     initializeHostHolidayModel();
     initializevideosModel();
     initializeBannersModel();
+    initializePasswordResetOtp();
 }
 
 module.exports = { tableInitializer };

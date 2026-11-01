@@ -29,6 +29,18 @@ const sendLoginNotificationEmail = async (user) => {
     });
 };
 
+const sendPasswordResetOtpEmail = async (user, otp) => {
+    return sendEmail({
+        to: user.email,
+        subject: "Your House of Boarding password reset code",
+        template: "password-reset-otp",
+        data: {
+            name: user.name,
+            otp
+        }
+    });
+};
+
 const sendbookingConfirmationEmailtoCustomer = async (booking) => {
     return sendEmail({
         to: booking.email,
@@ -98,6 +110,7 @@ const sendBookingCancellationEmailToHost = async (booking) => {
 
 module.exports = {
     sendLoginNotificationEmail,
+    sendPasswordResetOtpEmail,
     sendbookingConfirmationEmailtoCustomer,
     sendbookingConfirmationEmailtoHost,
     sendBookingCancellationEmailToCustomer,

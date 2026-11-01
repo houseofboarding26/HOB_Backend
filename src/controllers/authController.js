@@ -1,8 +1,14 @@
 const jwt = require('jsonwebtoken');
-const { sendLoginNotificationEmail } = require('./../services/email/emailService');
+const {
+    sendLoginNotificationEmail,
+    sendPasswordResetOtpEmail
+} = require('./../services/email/emailService');
 const { getUserById, getUserByEmailService, updateUserPasswordService } = require('./../services/userService');
+const { deletePasswordResetOtp, getPasswordResetOtp, savePasswordResetOtp } = require('../services/passwordResetOtpService');
+const { createHash, randomInt } = require('crypto');
 
 const expiresIn = '24h';
+const OTP_EXPIRY_MS = 5 * 60 * 1000;
 
 const generateToken = (user) => {
     return jwt.sign(
@@ -46,38 +52,138 @@ const loginController = async (req, res) => {
     }
 };
 
-const forgetPasswordController = async (req, res) => {
-    const OTP = "123456"
+const sendOtpController = async (req, res) => {
     try {
-        const user = req.body;
-        if (OTP !== user.otp) {
-            return res.status(404).json({
+        const { email } = req.body;
+        if (typeof email !== 'string' || !email.trim()) {
+            return res.status(400).json({
                 success: false,
-                message: 'Invalid OTP',
+                message: 'Email is required'
             });
         }
-        const userdetails = await getUserByEmailService(user.email);
-        if (!userdetails) {
-            return res.status(404).json({
-                success: false,
-                message: 'Authentication failed',
-            });
-        }
-        if (user.newPassword !== user.confirmPassword) {
-            return res.status(404).json({
-                success: false,
-                message: 'new password doest not match with conform password',
-            });
-        }
-        await updateUserPasswordService(user.confirmPassword, userdetails.id)
 
-        return res.status(201).json({
-            message: 'password updated successfully',
+        const userdetails = await getUserByEmailService(email.trim());
+        if (!userdetails) {
+            return res.status(200).json({
+                success: true,
+                message: 'If an account exists for this email, an OTP has been sent'
+            });
+        }
+
+        const otp = String(randomInt(100000, 1000000));
+        const otpHash = createHash('sha256').update(otp).digest('hex');
+        await savePasswordResetOtp(userdetails.email, otpHash);
+        try {
+            await sendPasswordResetOtpEmail(userdetails, otp);
+        } catch (error) {
+            await deletePasswordResetOtp(userdetails.email);
+            throw error;
+        }
+
+        return res.status(200).json({
             success: true,
-            userId: userdetails.id,
+            message: 'OTP will expire in 5 minutes.'
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to send verification OTP',
+            error: error.message
+        });
+    }
+};
+
+const forgetPasswordController = async (req, res) => {
+    try {
+        const user = req.body;
+
+        const submittedOtp = String(user.otp);
+        if (
+            typeof user.email !== 'string' ||
+            !user.email.trim() ||
+            !/^\d{6}$/.test(submittedOtp)
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: 'A valid email and 6-digit OTP are required'
+            });
+        }
+
+        const pendingOtp = await getPasswordResetOtp(user.email);
+        if (!pendingOtp) {
+            return res.status(400).json({
+                success: false,
+                message: 'OTP is missing or expired'
+            });
+        }
+
+        if (Date.now() - new Date(pendingOtp.createdAt).getTime() >= OTP_EXPIRY_MS) {
+            await deletePasswordResetOtp(user.email);
+            return res.status(400).json({
+                success: false,
+                message: 'OTP has expired'
+            });
+        }
+
+        if (pendingOtp.attempts >= 5) {
+            await deletePasswordResetOtp(user.email);
+            return res.status(400).json({
+                success: false,
+                message: 'Too many invalid OTP attempts. Request a new code'
+            });
+        }
+
+        const submittedOtpHash = createHash('sha256').update(submittedOtp).digest('hex');
+        if (submittedOtpHash !== pendingOtp.otpHash) {
+            pendingOtp.attempts += 1;
+            if (pendingOtp.attempts >= 5) {
+                await deletePasswordResetOtp(user.email);
+            } else {
+                await pendingOtp.save();
+            }
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid OTP'
+            });
+        }
+
+        if (
+            typeof user.newPassword !== 'string' ||
+            user.newPassword.length < 6 ||
+            typeof user.confirmPassword !== 'string'
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 6 characters long'
+            });
+        }
+
+        if (user.newPassword !== user.confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'New password does not match the confirmation'
+            });
+        }
+
+        const userdetails = await getUserByEmailService(user.email.trim());
+        if (!userdetails) {
+            await deletePasswordResetOtp(user.email);
+            return res.status(404).json({
+                success: false,
+                message: 'Authentication failed'
+            });
+        }
+
+        await updateUserPasswordService(user.confirmPassword, userdetails.id);
+        await deletePasswordResetOtp(user.email);
+
+        return res.status(201).json({
+            message: 'Password updated successfully',
+            success: true,
+            userId: userdetails.id
+        });
+    } catch (error) {
+        return res.status(500).json({
             message: 'Authentication failed',
             error: error.message
         });
@@ -111,4 +217,11 @@ const googleCallback = async (req, res) => {
     }
 };
 
-module.exports = { generateToken, googleCallback, expiresIn, loginController, forgetPasswordController };
+module.exports = {
+    generateToken,
+    googleCallback,
+    expiresIn,
+    loginController,
+    sendOtpController,
+    forgetPasswordController
+};

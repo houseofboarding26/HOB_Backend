@@ -45,6 +45,17 @@ frontend origins, with no paths, for example
 `https://houseofboarding.com,https://www.houseofboarding.com,https://hob-frontend-plum.vercel.app`.
 `BASE_URL` is also allowed. Redeploy after changing environment variables.
 
+## Password reset with email OTP
+
+Request a verification code with `POST /api/auth/send-otp` and a JSON body such
+as `{"email":"user@example.com"}`. If the account exists, the server emails a
+random six-digit code. Its hashed value and creation time are stored in the
+`PasswordResetOtps` database table, and the code expires after 5 minutes.
+
+Complete the reset with `PUT /api/auth/forgetpassword` and
+`{"email":"user@example.com","otp":"123456","newPassword":"new-secret","confirmPassword":"new-secret"}`.
+The OTP is limited to five verification attempts and is deleted after a
+successful reset. The server ensures the OTP table exists during startup.
 
 Step 2: Install Dependencies
 npm install passport passport-google-oauth20 express-session dotenv
